@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BookKart - Online Book Store</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#f5f7fb;color:#222}
+header{background:#2874f0;color:#fff;padding:12px 5%;display:flex;align-items:center;gap:22px;position:sticky;top:0;z-index:10}
+.logo{font-size:25px;font-weight:800;white-space:nowrap}
+.logo span{color:#ffe500}
+.search{flex:1;display:flex;background:#fff;border-radius:4px;overflow:hidden}
+.search input{flex:1;padding:12px;border:0;outline:0;font-size:15px}
+.search button{border:0;background:#fff;padding:0 16px;font-size:18px;cursor:pointer}
+.cart{font-weight:bold;cursor:pointer;white-space:nowrap}
+.hero{margin:18px 5%;background:linear-gradient(110deg,#eaf2ff,#fff);border-radius:14px;padding:34px;display:flex;justify-content:space-between;align-items:center}
+.hero h1{font-size:34px;margin-bottom:10px}.hero p{color:#555;margin-bottom:18px}
+.btn{background:#ff9f00;color:#fff;border:0;padding:12px 22px;border-radius:5px;font-weight:bold;cursor:pointer}
+.categories{display:flex;gap:12px;overflow:auto;padding:0 5% 18px}
+.cat{background:#fff;border:1px solid #e4e7ee;padding:11px 18px;border-radius:22px;white-space:nowrap;cursor:pointer}
+.cat.active,.cat:hover{background:#2874f0;color:#fff}
+section{padding:0 5% 30px}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:12px 0 16px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px #00000012}
+.cover{height:210px;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;font-weight:bold;font-size:20px;padding:20px;margin-bottom:12px}
+.card h3{font-size:16px;margin-bottom:6px}.author{color:#777;font-size:13px;margin-bottom:8px}
+.price{font-weight:bold;font-size:18px}.old{text-decoration:line-through;color:#999;font-size:13px;margin-left:6px}.off{color:#168a3b;font-size:13px;margin-left:6px}
+.card button{width:100%;margin-top:12px;padding:10px;border:0;border-radius:5px;background:#2874f0;color:white;font-weight:bold;cursor:pointer}
+footer{background:#172337;color:#fff;padding:28px 5%;margin-top:10px;text-align:center}
+#toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:12px 20px;border-radius:8px;display:none;z-index:20}
+@media(max-width:800px){header{flex-wrap:wrap}.search{order:3;flex-basis:100%}.hero{padding:25px}.hero h1{font-size:26px}.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.grid{grid-template-columns:1fr 1fr;gap:10px}.cover{height:170px}.hero{margin:12px 3%;padding:20px}section,.categories{padding-left:3%;padding-right:3%}}
+
+.used-section{padding:0 5% 35px}
+.sell-panel{background:#fff;border-radius:12px;padding:20px;margin-bottom:18px;box-shadow:0 2px 8px #00000012}
+.sell-panel h2{margin-bottom:8px}.sell-panel p{color:#666;margin-bottom:15px}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.form-grid input,.form-grid select{padding:11px;border:1px solid #ddd;border-radius:6px;outline:none}
+.form-grid button{background:#2874f0;color:white;border:0;border-radius:6px;font-weight:bold;cursor:pointer}
+.used-card{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px #00000012}
+.used-cover{height:150px;background:#eceff4;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:55px;margin-bottom:10px}
+.condition{display:inline-block;background:#e9f7ef;color:#16713b;padding:4px 8px;border-radius:12px;font-size:12px;margin:5px 0}
+.seller{font-size:13px;color:#777;margin-top:7px}
+@media(max-width:800px){.form-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
+
+.photo-upload{grid-column:1/-1;border:2px dashed #777;border-radius:8px;padding:14px;text-align:center;background:#252525}.photo-upload label{display:block;cursor:pointer;color:#fff;font-weight:bold}.photo-upload input{display:none}.photo-preview{display:flex;gap:8px;overflow:auto;margin-top:10px}.photo-preview img{width:75px;height:75px;object-fit:cover;border-radius:6px;border:1px solid #888}.photo-count{font-size:12px;color:#777;margin-top:4px}.used-photo{height:180px;border-radius:7px;overflow:hidden;background:#eceff4;margin-bottom:10px}.used-photo img{width:100%;height:100%;object-fit:cover}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Book<span>Kart</span></div>
+  <div class="search"><input id="search" placeholder="Search for books, authors..."><button onclick="searchBooks()">🔍</button></div>
+  <div class="cart" onclick="showCart()">🛒 Cart (<span id="cartCount">0</span>)</div>
+</header>
+
+<div class="hero">
+  <div>
+    <h1>Discover Your Next Book 📚</h1>
+    <p>Great books. Great prices. Delivered to your door.</p>
+    <button class="btn" onclick="document.getElementById('books').scrollIntoView()">Shop Now</button>
+  </div>
+  <div style="font-size:80px">📚</div>
+</div>
+
+<div class="categories">
+  <div class="cat active" onclick="filterBooks('All',this)">All</div>
+  <div class="cat" onclick="filterBooks('Fiction',this)">Fiction</div>
+  <div class="cat" onclick="filterBooks('Education',this)">Education</div>
+  <div class="cat" onclick="filterBooks('Technology',this)">Technology</div>
+  <div class="cat" onclick="filterBooks('Kids',this)">Kids</div>
+  <div class="cat" onclick="filterBooks('Self Help',this)">Self Help</div>
+</div>
+
+<section id="books">
+<div class="section-title"><h2>Popular Books</h2><span id="result"></span></div>
+<div class="grid" id="grid"></div>
+</section>
+
+
+<section class="used-section" id="usedBooks">
+  <div class="section-title">
+    <h2>♻️ BookKart Re-Read</h2>
+    <span>Buy & sell second-hand books</span>
+  </div>
+
+  <div class="sell-panel">
+    <h2>📚 Sell Your Used Book</h2>
+    <p>Give your old books a new reader. Add your book details below.</p>
+    <div class="form-grid">
+      <input id="sellTitle" placeholder="Book title">
+      <input id="sellAuthor" placeholder="Author">
+      <input id="sellPrice" type="number" placeholder="Price (₹)">
+      <select id="sellCondition">
+        <option value="">Book condition</option>
+        <option>Like New</option>
+        <option>Very Good</option>
+        <option>Good</option>
+        <option>Acceptable</option>
+      </select>
+      <input id="sellSeller" placeholder="Seller name">
+      <div class="photo-upload">
+        <label for="bookPhotos">📸 Add Book Photos (up to 4)</label>
+        <input id="bookPhotos" type="file" accept="image/*" multiple onchange="previewBookPhotos(event)">
+        <div id="photoPreview" class="photo-preview"></div>
+      </div>
+      <button onclick="listUsedBook()">List My Book</button>
+    </div>
+  </div>
+
+  <div class="grid" id="usedGrid"></div>
+</section>
+
+<footer>
+      <h2>BookKart</h2>
+      <p style="margin-top:8px;color:#ccd3df">Your friendly online bookstore</p>
+      <div style="margin-top:18px;padding:16px;background:#202f43;border-radius:10px;display:inline-block">
+        <div style="font-size:13px;color:#b9c5d4">FOUNDER</div>
+        <div style="font-size:21px;font-weight:bold;margin-top:5px">Ismail Chand Shaikh</div>
+      </div>
+    </footer>
+<div id="toast"></div>
+
+<script>
+const books=[
+ {title:"The Alchemist",author:"Paulo Coelho",price:299,old:399,cat:"Fiction",emoji:"✨",bg:"#6b4eff"},
+ {title:"Atomic Habits",author:"James Clear",price:349,old:499,cat:"Self Help",emoji:"🎯",bg:"#1f8a70"},
+ {title:"Rich Dad Poor Dad",author:"Robert Kiyosaki",price:279,old:399,cat:"Self Help",emoji:"💰",bg:"#d97904"},
+ {title:"JavaScript Basics",author:"Tech Books",price:449,old:599,cat:"Technology",emoji:"💻",bg:"#333"},
+ {title:"Mathematics Class 12",author:"Exam Guide",price:399,old:499,cat:"Education",emoji:"📐",bg:"#286090"},
+ {title:"The Jungle Book",author:"Rudyard Kipling",price:199,old:299,cat:"Kids",emoji:"🐯",bg:"#388e3c"},
+ {title:"Harry Potter",author:"J. K. Rowling",price:499,old:699,cat:"Fiction",emoji:"🪄",bg:"#6a1b9a"},
+ {title:"Science Explorer",author:"Learning House",price:249,old:349,cat:"Education",emoji:"🔬",bg:"#00838f"}
+];
+let current="All",cart=0;
+
+let usedBooks=[
+ {title:"NCERT Physics Class 12",author:"NCERT",price:180,condition:"Good",seller:"Student Seller"},
+ {title:"Engineering Mathematics",author:"Study Guide",price:220,condition:"Very Good",seller:"BookKart Seller"}
+];
+
+function renderUsedBooks(){
+ const grid=document.getElementById("usedGrid");
+ grid.innerHTML=usedBooks.map((b,i)=>`<div class="used-card">
+   <div class="used-photo">${b.photos && b.photos.length ? `<img src="${b.photos[0]}" alt="${b.title}">` : "📖"}</div>
+   <h3>${b.title}</h3>
+   <div class="author">by ${b.author}</div>
+   <span class="condition">${b.condition}</span>
+   <div class="price">₹${b.price}</div>
+   <div class="seller">Seller: ${b.seller}</div>
+   ${b.photos && b.photos.length ? `<div class="photo-count">📸 ${b.photos.length} photo${b.photos.length>1?"s":""} available</div>` : ""}
+   <button onclick="buyUsed(${i})">View Photos / Buy</button>
+ </div>`).join("");
+}
+let selectedBookPhotos=[];
+function previewBookPhotos(event){
+ const files=[...event.target.files].slice(0,4); selectedBookPhotos=[];
+ const preview=document.getElementById("photoPreview"); preview.innerHTML="";
+ files.forEach(file=>{const reader=new FileReader(); reader.onload=e=>{selectedBookPhotos.push(e.target.result); const img=document.createElement("img"); img.src=e.target.result; preview.appendChild(img);}; reader.readAsDataURL(file);});
+}
+
+function listUsedBook(){
+ const title=document.getElementById("sellTitle").value.trim();
+ const author=document.getElementById("sellAuthor").value.trim();
+ const price=Number(document.getElementById("sellPrice").value);
+ const condition=document.getElementById("sellCondition").value;
+ const seller=document.getElementById("sellSeller").value.trim();
+ if(!title||!author||!price||!condition||!seller){toast("Please fill all seller details.");return;}
+ usedBooks.unshift({title,author,price,condition,seller,photos:[...selectedBookPhotos]});
+ renderUsedBooks();
+ ["sellTitle","sellAuthor","sellPrice","sellSeller"].forEach(id=>document.getElementById(id).value="");
+ document.getElementById("sellCondition").value="";
+ toast("Your used book is listed! 📚");
+}
+function buyUsed(i){
+ const b=usedBooks[i];
+ if(!b.photos || !b.photos.length){toast("No photos uploaded for this book yet.");return;}
+ const win=window.open("","_blank","width=500,height=650");
+ if(win){win.document.write(`<html><head><title>${b.title}</title><style>body{font-family:Arial;padding:20px;background:#f5f5f5}img{width:100%;max-height:420px;object-fit:contain;background:#fff;margin-bottom:10px;border-radius:8px}h2{margin-bottom:5px}</style></head><body><h2>${b.title}</h2><p>Seller: ${b.seller} · ₹${b.price}</p>${b.photos.map(p=>`<img src="${p}">`).join("")}</body></html>`);win.document.close();}
+ else toast("Please allow pop-ups to view the photos.");
+}
+
+function render(list=books){
+ const grid=document.getElementById("grid");
+ grid.innerHTML=list.map((b,i)=>`<div class="card">
+ <div class="cover" style="background:${b.bg}"><div>${b.emoji}<br><br>${b.title}</div></div>
+ <h3>${b.title}</h3><div class="author">by ${b.author}</div>
+ <div><span class="price">₹${b.price}</span><span class="old">₹${b.old}</span><span class="off">${Math.round((1-b.price/b.old)*100)}% off</span></div>
+ <button onclick="addCart('${b.title}')">Add to Cart</button></div>`).join("");
+ document.getElementById("result").textContent=list.length+" books";
+}
+function filterBooks(cat,el){current=cat;document.querySelectorAll(".cat").forEach(x=>x.classList.remove("active"));el.classList.add("active");render(cat==="All"?books:books.filter(b=>b.cat===cat))}
+function searchBooks(){let q=document.getElementById("search").value.toLowerCase();render(books.filter(b=>(b.title+" "+b.author+" "+b.cat).toLowerCase().includes(q)))}
+function addCart(title){cart++;document.getElementById("cartCount").textContent=cart;toast(title+" added to cart 🛒")}
+function showCart(){toast(cart?`You have ${cart} item${cart>1?"s":""} in your cart.`:"Your cart is empty.")}
+function toast(msg){let t=document.getElementById("toast");t.textContent=msg;t.style.display="block";clearTimeout(window.tt);window.tt=setTimeout(()=>t.style.display="none",1800)}
+document.getElementById("search").addEventListener("keydown",e=>{if(e.key==="Enter")searchBooks()});
+render();
+renderUsedBooks();
+</script>
+</body>
+</html>
